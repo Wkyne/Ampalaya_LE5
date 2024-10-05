@@ -3,7 +3,7 @@ package com.ampalaya;
 import java.io.IOException;
 import javafx.fxml.FXML;
 
-public class PrimaryController {
+public class WeatherLocationApp {
 
     @FXML
     private void switchToSecondary() throws IOException {
