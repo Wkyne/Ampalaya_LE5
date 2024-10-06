@@ -1,7 +1,6 @@
 package com.ampalaya;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -60,24 +59,24 @@ public class WeatherLocationApp {
                 
                 latitude = firstResult.get("latitude").getAsDouble();
                 longitude = firstResult.get("longitude").getAsDouble();
-                Double[] longlat = {longitude,latitude};
-                return longlat;
-                // longlat.
+                
+                Double[] latlong = {latitude, longitude};
+                return latlong;
             }
 
         } catch (Exception e) {
            e.printStackTrace();
         }
         return null;
-        // getWeatherdata(latitude, longitude);
+        
     }
 
-    public static JsonObject getWeatherdata(double latitude, double longitude){
+    public static JsonObject getWeatherdata(double[] latlong){
         String urlString = "";
 
         urlString += "https://api.open-meteo.com/v1/forecast?"+
-        "latitude="+ latitude + 
-        "&longitude="+ longitude +"&hourly=temperature_2m,relative_humidity_2m,weather_code";
+        "latitude="+ latlong[0] + 
+        "&longitude="+ latlong[1] +"&hourly=temperature_2m,relative_humidity_2m,weather_code";
 
 
         try {
