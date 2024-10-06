@@ -9,6 +9,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 // import java.util.Arrays;
 
+import com.google.gson.JsonObject;
+
 /**
  * JavaFX App
  */
@@ -34,6 +36,19 @@ public class App extends Application {
 
     public static void main(String[] args) {
         // System.out.println(WeatherLocationApp.getTime());
+
+
+        double[] result = WeatherLocationApp.getLocationdata("MANILA");
+        JsonObject outcome = WeatherLocationApp.getWeatherdata(result);
+        System.out.println("Location: MANILA \n" + 
+                            "Humidity:" + outcome.get("humidity") + "\n" +
+                            "Weather Condition: " + outcome.get("weatherCondition") +  "\n" +
+                            "Temperature: " + outcome.get("temperature") +  "\n" +
+                            "Windspeed: " + outcome.get("windspeed") 
+                            );
+
+
+
         launch();
 
         

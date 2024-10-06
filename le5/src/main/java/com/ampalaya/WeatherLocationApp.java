@@ -22,7 +22,7 @@ public class WeatherLocationApp {
         App.setRoot("settings");
     }
     
-    public static Double[] getLocationdata(String locationCity){
+    public static double[] getLocationdata(String locationCity){
         //initialize variables
         double latitude = 0;
         double longitude = 0;
@@ -57,7 +57,7 @@ public class WeatherLocationApp {
                 latitude = firstResult.get("latitude").getAsDouble();
                 longitude = firstResult.get("longitude").getAsDouble();
                 
-                Double[] latlong = {latitude, longitude};
+                double[] latlong = {latitude, longitude};
                 return latlong;
             }
 
@@ -73,7 +73,7 @@ public class WeatherLocationApp {
 
         urlString += "https://api.open-meteo.com/v1/forecast?"+
         "latitude="+ latlong[0] + 
-        "&longitude="+ latlong[1] +"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
+        "&longitude="+ latlong[1] +"&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min";
 
 
         try {
@@ -95,16 +95,32 @@ public class WeatherLocationApp {
                 JsonArray weatherData = resultsJsonObj.getAsJsonArray("results");
                 JsonObject hourly = (JsonObject) resultsJsonObj.get("hourly");
                 JsonArray time = (JsonArray) hourly.get("time");
+                int index = findIndexperTime(time);
+
+                // JsonArray tempData =
+                
+                JsonObject rightNowData = (JsonObject) resultsJsonObj.get("current");
+                double tempData = rightNowData.get("temperature_2m").getAsDouble();
+
+                String weatherCondition = convertWeatherCode(rightNowData.get("weather_code").getAsLong());
+                
+                long humidity = rightNowData.get("relative_humidity_2m").getAsLong();
+
+                double windspeed = rightNowData.get("wind_speed_10m").getAsDouble();
 
 
+                JsonObject resultData = new JsonObject();
+                resultData.addProperty("weatherCondition", weatherCondition);
+                resultData.addProperty("temperature", tempData);
+                resultData.addProperty("humidity", humidity);
+                resultData.addProperty("windspeed", windspeed);
+
+
+                return resultData;
             }    
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-
-        
-
         return null;
     }
 
@@ -124,10 +140,40 @@ public class WeatherLocationApp {
         return null;
     }
 
-    private static int findIndexperTime(JsonArray time){
-        return 0;
+    private static int findIndexperTime(JsonArray timeList){
+        String cTime = getTime();
 
+
+        for (int i =0; i < timeList.size();i++){
+            // String time = _(String) timeList.get(i);
+            String time = String.valueOf(timeList.get(i));
+            if(time.equalsIgnoreCase(cTime)){
+                return i;
+            }   
+        }
+        //cant find index 
+        return 0;
     }
+
+
+    private static String convertWeatherCode(long weather_code){
+        String weatherCondition = "";
+
+        if (weather_code == 0L) {
+            weatherCondition = "Clear";
+        } 
+        else if(weather_code > 0L && weather_code < 3L) {
+            weatherCondition = "Cloudy";
+        }
+        else if((weather_code >= 51L && weather_code <= 67L) || (weather_code >= 80L && weather_code <= 99L)){
+            weatherCondition = "Raining";
+        }
+        else if(weather_code > 71L && weather_code < 77L) {
+            weatherCondition = "Snowing";
+        } 
+        return weatherCondition;
+    }
+
 
     public static String getTime(){
         LocalDateTime cTime = LocalDateTime.now();
@@ -140,4 +186,3 @@ public class WeatherLocationApp {
     }
 }
 
-//beni test push
