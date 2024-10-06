@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * JavaFX App
@@ -17,7 +18,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("appgui"), 300, 300);
+        scene = new Scene(loadFXML("appgui"));
         stage.setScene(scene);
         stage.show();
     }
@@ -32,7 +33,10 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        System.out.println(Arrays.toString(WeatherLocationApp.getLocationdata("MANILA")));
+        // launch();
+
+        
     }
 
 }
