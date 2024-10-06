@@ -2,13 +2,15 @@ package com.ampalaya;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import com.google.gson.Gson;
+// import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -22,10 +24,10 @@ public class WeatherLocationApp {
         App.setRoot("settings");
     }
     
-    public static double[] getLocationdata(String locationCity){
+    public static Double[] getLocationdata(String locationCity){
         //initialize variables
-        double latitude = 0;
-        double longitude = 0;
+        Double latitude = 0.0;
+        Double longitude = 0.0;
         locationCity = locationCity.replaceAll(" ", "+");
         String urlString = "";
 
@@ -57,7 +59,7 @@ public class WeatherLocationApp {
                 latitude = firstResult.get("latitude").getAsDouble();
                 longitude = firstResult.get("longitude").getAsDouble();
                 
-                double[] latlong = {latitude, longitude};
+                Double[] latlong = {latitude, longitude};
                 return latlong;
             }
 
@@ -68,7 +70,7 @@ public class WeatherLocationApp {
         
     }
 
-    public static JsonObject getWeatherdata(double[] latlong){
+    public static JsonObject getWeatherdata(Double[] latlong){
         String urlString = "";
 
         urlString += "https://api.open-meteo.com/v1/forecast?"+
@@ -92,21 +94,16 @@ public class WeatherLocationApp {
                 connec.disconnect();
 
                 JsonObject resultsJsonObj = JsonParser.parseString(String.valueOf(weatherJson)).getAsJsonObject();
-                JsonArray weatherData = resultsJsonObj.getAsJsonArray("results");
-                JsonObject hourly = (JsonObject) resultsJsonObj.get("hourly");
-                JsonArray time = (JsonArray) hourly.get("time");
-                int index = findIndexperTime(time);
-
-                // JsonArray tempData =
+                
                 
                 JsonObject rightNowData = (JsonObject) resultsJsonObj.get("current");
-                double tempData = rightNowData.get("temperature_2m").getAsDouble();
+                Double tempData = rightNowData.get("temperature_2m").getAsDouble();
 
                 String weatherCondition = convertWeatherCode(rightNowData.get("weather_code").getAsLong());
                 
                 long humidity = rightNowData.get("relative_humidity_2m").getAsLong();
 
-                double windspeed = rightNowData.get("wind_speed_10m").getAsDouble();
+                Double windspeed = rightNowData.get("wind_speed_10m").getAsDouble();
 
 
                 JsonObject resultData = new JsonObject();
@@ -115,6 +112,10 @@ public class WeatherLocationApp {
                 resultData.addProperty("humidity", humidity);
                 resultData.addProperty("windspeed", windspeed);
 
+                JsonArray otherDays = getWeeklyData(resultsJsonObj);
+
+
+                resultData.add("otherDays", otherDays);
 
                 return resultData;
             }    
@@ -140,20 +141,24 @@ public class WeatherLocationApp {
         return null;
     }
 
-    private static int findIndexperTime(JsonArray timeList){
-        String cTime = getTime();
+   
+    private static JsonArray getWeeklyData(JsonObject resultsJsonObj){
 
+        JsonArray otherDays = new JsonArray();
+        JsonObject daily = (JsonObject) resultsJsonObj.get("daily");
+        JsonArray date = (JsonArray) daily.get("time");
+        JsonArray cond = (JsonArray) daily.get("weather_code");
 
-        for (int i =0; i < timeList.size();i++){
-            // String time = _(String) timeList.get(i);
-            String time = String.valueOf(timeList.get(i));
-            if(time.equalsIgnoreCase(cTime)){
-                return i;
-            }   
+        for (int i = 1; i < date.size();i++){
+            String day = getDayoftheWeek(date.get(i).getAsString());
+            String condition = convertWeatherCode(cond.get(i).getAsLong());
+            otherDays.add(createDayWeather(day, condition));
         }
-        //cant find index 
-        return 0;
+        return otherDays;
     }
+
+    
+
 
 
     private static String convertWeatherCode(long weather_code){
@@ -175,14 +180,29 @@ public class WeatherLocationApp {
     }
 
 
-    public static String getTime(){
-        LocalDateTime cTime = LocalDateTime.now();
-        //reformater to  2024-10-07T07:00
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH':00'");
-
-        String fcTime = cTime.format(formatter);
-
-        return fcTime;
+    public static String reformatDate(){
+        LocalDate cDate = LocalDate.now();
+        //reformater to  2024-10-07 just to be sure
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String fcDate = cDate.format(formatter);
+        return fcDate;
     }
+
+
+    public static String getDayoftheWeek(String dateStr){
+
+        LocalDate date = LocalDate.parse(dateStr.replace("\"", ""));
+        String dayOfWeek = date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        return dayOfWeek;
+    }
+
+    private static JsonObject createDayWeather(String day, String condition) {
+        JsonObject dayWeather = new JsonObject();
+        dayWeather.addProperty("day", day);
+        dayWeather.addProperty("condition", condition);
+        return dayWeather;
+    }
+
+
 }
 

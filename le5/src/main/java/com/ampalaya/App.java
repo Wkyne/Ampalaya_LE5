@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 // import java.util.Arrays;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
@@ -38,14 +39,36 @@ public class App extends Application {
         // System.out.println(WeatherLocationApp.getTime());
 
 
-        double[] result = WeatherLocationApp.getLocationdata("MANILA");
+        Double[] result = WeatherLocationApp.getLocationdata("MANILA");
         JsonObject outcome = WeatherLocationApp.getWeatherdata(result);
+        // Assuming outcome is your JsonObject containing the weather data
         System.out.println("Location: MANILA \n" + 
-                            "Humidity:" + outcome.get("humidity") + "\n" +
+                            "Humidity: " + outcome.get("humidity") + "\n" +
                             "Weather Condition: " + outcome.get("weatherCondition") +  "\n" +
                             "Temperature: " + outcome.get("temperature") +  "\n" +
-                            "Windspeed: " + outcome.get("windspeed") 
-                            );
+                            "Windspeed: " + outcome.get("windspeed") + "\n" +
+                            "Other Days' Weather:");
+
+        // Extract the 'otherDays' array
+        JsonArray otherDays = outcome.getAsJsonArray("otherDays");
+
+        if (otherDays != null) {
+            // Loop through each day-weather pair in the otherDays array
+            for (int i = 0; i < otherDays.size(); i++) {
+                JsonObject dayWeather = otherDays.get(i).getAsJsonObject();
+                String day = dayWeather.get("day").getAsString();
+                String condition = dayWeather.get("condition").getAsString();
+                
+                // Print each day's weather condition
+                System.out.println(day + ": " + condition);
+            }
+        } else {
+            System.out.println("No data available for other days.");
+        }
+
+
+
+                            
 
 
 
