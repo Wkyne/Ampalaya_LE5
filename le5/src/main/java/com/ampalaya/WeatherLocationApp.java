@@ -75,7 +75,7 @@ public class WeatherLocationApp {
 
         urlString += "https://api.open-meteo.com/v1/forecast?"+
         "latitude="+ latlong[0] + 
-        "&longitude="+ latlong[1] +"&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min";
+        "&longitude="+ latlong[1] +"&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max&timezone=Asia%2FSingapore";
 
 
         try {
@@ -116,7 +116,7 @@ public class WeatherLocationApp {
 
 
                 resultData.add("otherDays", otherDays);
-
+                System.out.println("Weather JSON: " + resultsJsonObj.toString());
                 return resultData;
             }    
         } catch (Exception e) {
@@ -167,7 +167,7 @@ public class WeatherLocationApp {
         if (weather_code == 0L) {
             weatherCondition = "Clear";
         } 
-        else if(weather_code > 0L && weather_code < 3L) {
+        else if(weather_code > 0L && weather_code <= 3L) {
             weatherCondition = "Cloudy";
         }
         else if((weather_code >= 51L && weather_code <= 67L) || (weather_code >= 80L && weather_code <= 99L)){
