@@ -2,6 +2,8 @@ package com.ampalaya;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -20,11 +22,6 @@ public class WeatherLocationApp {
         App.setRoot("settings");
     }
     
-
-    
-   
-
-
     public static Double[] getLocationdata(String locationCity){
         //initialize variables
         double latitude = 0;
@@ -52,7 +49,7 @@ public class WeatherLocationApp {
                 connec.disconnect();
 
                 //dis shi too long ngl
-                JsonObject resultsJsonObj = JsonParser.parseString(locationJson.toString()).getAsJsonObject();
+                JsonObject resultsJsonObj = JsonParser.parseString(String.valueOf(locationJson)).getAsJsonObject();
                 JsonArray locationData = resultsJsonObj.getAsJsonArray("results");
                 
                 JsonObject firstResult = locationData.get(0).getAsJsonObject();
@@ -76,7 +73,7 @@ public class WeatherLocationApp {
 
         urlString += "https://api.open-meteo.com/v1/forecast?"+
         "latitude="+ latlong[0] + 
-        "&longitude="+ latlong[1] +"&hourly=temperature_2m,relative_humidity_2m,weather_code";
+        "&longitude="+ latlong[1] +"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
 
 
         try {
@@ -94,21 +91,13 @@ public class WeatherLocationApp {
                 scan.close();
                 connec.disconnect();
 
-                //dis shi too long ngl
-                JsonObject resultsJsonObj = JsonParser.parseString(weatherJson.toString()).getAsJsonObject();
-                JsonArray locationData = resultsJsonObj.getAsJsonArray("results");
-                
-                JsonObject firstResult = locationData.get(0).getAsJsonObject();
-                
-                latitude = firstResult.get("latitude").getAsDouble();
-                longitude = firstResult.get("longitude").getAsDouble();
-            }
+                JsonObject resultsJsonObj = JsonParser.parseString(String.valueOf(weatherJson)).getAsJsonObject();
+                JsonArray weatherData = resultsJsonObj.getAsJsonArray("results");
+                JsonObject hourly = (JsonObject) resultsJsonObj.get("hourly");
+                JsonArray time = (JsonArray) hourly.get("time");
 
 
-
-
-
-            
+            }    
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -135,5 +124,18 @@ public class WeatherLocationApp {
         return null;
     }
 
+    private static int findIndexperTime(JsonArray time){
+        return 0;
 
+    }
+
+    public static String getTime(){
+        LocalDateTime cTime = LocalDateTime.now();
+        //reformater to  2024-10-07T07:00
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH':00'");
+
+        String fcTime = cTime.format(formatter);
+
+        return fcTime;
+    }
 }

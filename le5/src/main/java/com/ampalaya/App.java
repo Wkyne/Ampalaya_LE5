@@ -33,7 +33,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-        // System.out.println(Arrays.toString(WeatherLocationApp.getLocationdata("MANILA")));
+        // System.out.println(WeatherLocationApp.getTime());
         launch();
 
         
