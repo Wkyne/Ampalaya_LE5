@@ -1,5 +1,6 @@
 package com.ampalaya;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -7,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -15,15 +17,143 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 
 public class WeatherLocationApp {
-
+    
     @FXML
     private void switchToSecondary() throws IOException {
         App.setRoot("settings");
     }
+
+    @FXML
+    private ObservableList<String> savedLocations = FXCollections.observableArrayList();
+
+    @FXML
+    private WebView webView;
     
+    @FXML
+    public void initialize() {
+        loadSavedLocations();
+        WebEngine webEngine = webView.getEngine();
+
+        // Load the HTML file into WebView
+        File file = new File("src/main/resources/ampalaya/WeatherMaps.html");
+        webEngine.load(file.toURI().toString());
+
+        // Wait for the page to load before modifying DOM
+        webEngine.documentProperty().addListener((obs, oldDoc, newDoc) -> {
+            if (newDoc != null) {
+                // Modify temperature and location dynamically using JavaScript
+                String temperature = "24°C";
+                String location = "Manila";
+
+                webEngine.executeScript("document.getElementById('temperature').innerText = '" + temperature + "';");
+                webEngine.executeScript("document.getElementById('location').innerText = '" + location + "';");
+            }
+        });
+    }
+    
+    private void loadSavedLocations() {
+        // For testing, you can hardcode some locations.
+        savedLocations.addAll("Manila", "Cebu", "Davao");
+        
+        // If you're using a file or database, load them here.
+        
+        // Update the UI
+        updateSavedLocationsUI();
+    }
+    
+    private void updateSavedLocationsUI() {
+        Object listViewSavedLocations;
+        // Assuming you have a ListView to display the saved locations
+        listViewSavedLocations.setItems(savedLocations);
+    }
+
+
+
+
+    //threading
+    public void fetchWeatherData(String locationCity) {
+        Task<JsonObject> weatherTask = new Task<>() {
+            @Override
+            protected JsonObject call() throws Exception {
+                // Fetch location data
+                Double[] result = getLocationdata(locationCity);
+                // Fetch weather data based on location
+                return getWeatherdata(result);
+            }
+
+            @Override
+            protected void succeeded() {
+                // This method is called on the JavaFX Application Thread
+                JsonObject outcome = new JsonObject();
+                try {
+                    outcome = get();
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    System.out.println(e);
+                    e.printStackTrace();
+                }
+                // You can now update your UI with the weather data
+                updateWeatherUI(outcome);
+            }
+
+            @Override
+            protected void failed() {
+                // Handle failure
+                System.out.println("Failed to fetch weather data.");
+            }
+        };
+
+        // Start the thread
+        new Thread(weatherTask).start();
+    }
+
+    private void updateWeatherUI(JsonObject outcome) {
+        if (outcome != null) {
+            String humidity = outcome.get("humidity").toString();
+            String weatherCondition = outcome.get("weatherCondition").getAsString();
+            String temperature = outcome.get("temperature").toString();
+            String windspeed = outcome.get("windspeed").toString();
+
+            // Here, you would update your UI components with the fetched data
+            System.out.println("Humidity: " + humidity);
+            System.out.println("Weather Condition: " + weatherCondition);
+            System.out.println("Temperature: " + temperature);
+            System.out.println("Windspeed: " + windspeed);
+
+            // Don't forget to update the other days as well
+            JsonArray otherDays = outcome.getAsJsonArray("otherDays");
+            if (otherDays != null) {
+                for (int i = 0; i < otherDays.size(); i++) {
+                    JsonObject dayWeather = otherDays.get(i).getAsJsonObject();
+                    String day = dayWeather.get("day").getAsString();
+                    String condition = dayWeather.get("condition").getAsString();
+                    System.out.println(day + ": " + condition);
+                }
+            } else {
+                System.out.println("No data available for other days.");
+            }
+        } else {
+            System.out.println("Failed to fetch weather data.");
+        }
+    }
+
+
+
+
+
+
+
+    //API call for location
     public static Double[] getLocationdata(String locationCity){
         //initialize variables
         Double latitude = 0.0;
@@ -69,7 +199,7 @@ public class WeatherLocationApp {
         return null;
         
     }
-
+    //API call for Weather
     public static JsonObject getWeatherdata(Double[] latlong){
         String urlString = "";
 
@@ -124,7 +254,7 @@ public class WeatherLocationApp {
         }
         return null;
     }
-
+    //method for returning API response
     private static HttpsURLConnection getAPIResponse(String urlString){
         try {
             @SuppressWarnings("deprecation")
@@ -140,8 +270,7 @@ public class WeatherLocationApp {
         //cant connect typ shi
         return null;
     }
-
-   
+    //weekly feature
     private static JsonArray getWeeklyData(JsonObject resultsJsonObj){
 
         JsonArray otherDays = new JsonArray();
@@ -160,7 +289,7 @@ public class WeatherLocationApp {
     
 
 
-
+    //basic methods
     private static String convertWeatherCode(long weather_code){
         String weatherCondition = "";
 
@@ -179,7 +308,6 @@ public class WeatherLocationApp {
         return weatherCondition;
     }
 
-
     public static String reformatDate(){
         LocalDate cDate = LocalDate.now();
         //reformater to  2024-10-07 just to be sure
@@ -187,7 +315,6 @@ public class WeatherLocationApp {
         String fcDate = cDate.format(formatter);
         return fcDate;
     }
-
 
     public static String getDayoftheWeek(String dateStr){
 
