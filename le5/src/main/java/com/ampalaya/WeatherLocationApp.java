@@ -72,7 +72,7 @@ public class WeatherLocationApp {
     private void updateSavedLocationsUI() {
         Object listViewSavedLocations;
         // Assuming you have a ListView to display the saved locations
-        listViewSavedLocations.setItems(savedLocations);
+        // listViewSavedLocations.setItems(savedLocations);
     }
 
 
