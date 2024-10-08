@@ -9,8 +9,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 // import java.util.Arrays;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+// import com.google.gson.JsonArray;
+// import com.google.gson.JsonObject;
 
 /**
  * JavaFX App
@@ -76,9 +76,5 @@ public class App extends Application {
 
 
         launch();
-        
-
-        
     }
-
 }

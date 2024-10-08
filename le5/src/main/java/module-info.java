@@ -3,7 +3,7 @@ module com.ampalaya {
     requires javafx.fxml;
     requires transitive javafx.graphics;
     requires transitive com.google.gson;
-    requires javafx.web;
+    // requires javafx.web;
     
 
     opens com.ampalaya to com.google.gson,javafx.fxml;

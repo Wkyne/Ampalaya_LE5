@@ -1,6 +1,6 @@
 package com.ampalaya;
 
-import java.io.File;
+// import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -21,8 +21,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
+
 
 public class WeatherLocationApp {
     
@@ -34,29 +33,12 @@ public class WeatherLocationApp {
     @FXML
     private ObservableList<String> savedLocations = FXCollections.observableArrayList();
 
-    @FXML
-    private WebView webView;
+    
     
     @FXML
     public void initialize() {
         loadSavedLocations();
-        WebEngine webEngine = webView.getEngine();
 
-        // Load the HTML file into WebView
-        File file = new File("src/main/resources/ampalaya/WeatherMaps.html");
-        webEngine.load(file.toURI().toString());
-
-        // Wait for the page to load before modifying DOM
-        webEngine.documentProperty().addListener((obs, oldDoc, newDoc) -> {
-            if (newDoc != null) {
-                // Modify temperature and location dynamically using JavaScript
-                String temperature = "24°C";
-                String location = "Manila";
-
-                webEngine.executeScript("document.getElementById('temperature').innerText = '" + temperature + "';");
-                webEngine.executeScript("document.getElementById('location').innerText = '" + location + "';");
-            }
-        });
     }
     
     private void loadSavedLocations() {
