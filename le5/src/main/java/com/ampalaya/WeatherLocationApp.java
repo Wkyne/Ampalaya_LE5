@@ -105,6 +105,12 @@ public class WeatherLocationApp {
     private ImageView weather2nd;
 
     @FXML
+    private ImageView humidicon;
+
+    @FXML
+    private ImageView windicon;
+
+    @FXML
     private ImageView weather3rd;
 
     @FXML
@@ -125,7 +131,7 @@ public class WeatherLocationApp {
     // @FXML
     // private ObservableList<String> savedLocations = FXCollections.observableArrayList();
 
-    private MapPoint effielPoint = new MapPoint(48, 2.29);
+    private MapPoint effielPoint = new MapPoint(14.5995, 120.9842);
     
     @FXML
     public void initialize() {
@@ -133,8 +139,58 @@ public class WeatherLocationApp {
         MapView mapView = createMapView();
         Mainlayout.getChildren().add(mapView);
         HBox.setHgrow(mapView, Priority.ALWAYS);
+        Image wicon = new Image("file:le5/src/main/resources/com/ampalaya/images/Windspeed.png");
+        Image hicon = new Image("file:le5/src/main/resources/com/ampalaya/images/humidity.png");
+        windicon.setImage(wicon);
+        humidicon.setImage(hicon);
+
+
+        // labels
+        curCity.setStyle("-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #023E8A;"); // DodgerBlue
+        curTemp.setStyle("-fx-font-size: 25px; -fx-text-fill: #1E90FF;"); // DeepSkyBlue
+        curWindspeed.setStyle("-fx-font-size: 16px; -fx-text-fill: #4169E1;"); // RoyalBlue
+        curHumid.setStyle("-fx-font-size: 16px; -fx-text-fill: #4169E1;"); // CornflowerBlue    
+        // buttons
+        searchbtn.setStyle(
+            "-fx-background-color: #007bff; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-size: 14px; " +
+            "-fx-border-radius: 5px;"
+        );
+    
+        // main layout (with border radius and background color)
+        Mainlayout.setStyle(
+            "-fx-border-radius: 50%; " +
+            "-fx-clip-radius: 50%; " +
+            "-fx-background-color: linear-gradient(to bottom right, #add8e6, #b0e0e6);"        );
+
+
+
+    
+        // Set dimensions of the main layout to maintain a square aspect ratio
+        Mainlayout.setPrefWidth(500);
+        Mainlayout.setPrefHeight(500);
+    
+        // Add the map view to the layout
+        fetchWeatherData("MANILA");
     }
     
+        
+
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
     public void searchLoc(){
         fetchWeatherData(citySearch.getText());
     }
@@ -183,6 +239,7 @@ public class WeatherLocationApp {
                     Double[] latLong = getLocationdata(locationCity); // Fetch latitude and longitude
                     updateMapUI(latLong[0], latLong[1]);
                     updateWeatherUI(outcome);
+                    updateWeeklyUI(outcome);
                 } catch (InterruptedException e) {
                     System.out.println(e);
                     e.printStackTrace();
@@ -197,7 +254,7 @@ public class WeatherLocationApp {
             @Override
             protected void failed() {
                 System.out.println("Failed to fetch weather data.");
-                curCity.setText("Failed to retrieve data");
+                curCity.setText("No City Found");
                 curTemp.setText("N/A");
                 curWindspeed.setText("N/A");
                 curHumid.setText("N/A");
@@ -211,6 +268,61 @@ public class WeatherLocationApp {
         new Thread(weatherTask).start();
     }
     
+    public void updateWeeklyUI(JsonObject outcome) {
+        if (outcome != null) {
+            JsonArray otherDays = outcome.getAsJsonArray("otherDays");
+            
+            // Check if otherDays is not null and contains data
+            if (otherDays != null && otherDays.size() > 0) {
+                // Loop through the next 7 days, updating the respective UI components
+                for (int i = 0; i < otherDays.size(); i++) {
+                    JsonObject dayWeather = otherDays.get(i).getAsJsonObject();
+                    
+                    // Assuming the days start from 2nd day (index 0) to the 7th day (index 5)
+                    switch (i) {
+                        case 0:
+                            day2nd.setText(dayWeather.get("day").getAsString());
+                            temp2nd.setText(dayWeather.get("condition").getAsString()); // You might want to get temperature too
+                            setWeatherImage(dayWeather.get("condition").getAsString(), weather2nd);
+                            break;
+                        case 1:
+                            day3rd.setText(dayWeather.get("day").getAsString());
+                            temp3rd.setText(dayWeather.get("condition").getAsString());
+                            setWeatherImage(dayWeather.get("condition").getAsString(), weather3rd);
+                            break;
+                        case 2:
+                            day4th.setText(dayWeather.get("day").getAsString());
+                            temp4th.setText(dayWeather.get("condition").getAsString());
+                            setWeatherImage(dayWeather.get("condition").getAsString(), weather4th);
+                            break;
+                        case 3:
+                            day5th.setText(dayWeather.get("day").getAsString());
+                            temp5th.setText(dayWeather.get("condition").getAsString());
+                            setWeatherImage(dayWeather.get("condition").getAsString(), weather5th);
+                            break;
+                        case 4:
+                            day6th.setText(dayWeather.get("day").getAsString());
+                            temp6th.setText(dayWeather.get("condition").getAsString());
+                            setWeatherImage(dayWeather.get("condition").getAsString(), weather6th);
+                            break;
+                        case 5:
+                            day7th.setText(dayWeather.get("day").getAsString());
+                            temp7th.setText(dayWeather.get("condition").getAsString());
+                            setWeatherImage(dayWeather.get("condition").getAsString(), weather7th);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } else {
+                System.out.println("No data available for the upcoming days.");
+            }
+        } else {
+            System.out.println("Failed to retrieve weekly weather data.");
+        }
+    }
+    
+
     private void updateWeatherUI(JsonObject outcome) {
         if (outcome != null) {
             String humidity = outcome.get("humidity").toString();
@@ -220,14 +332,19 @@ public class WeatherLocationApp {
 
             // Here, you would update your UI components with the fetched data
             
-            curHumid.setText(humidity);
+            curHumid.setText("Humidity: "+humidity);
             curTemp.setText(temperature+"°");
             setWeatherImage(weatherCondition, curWeather);
             curWindspeed.setText(windspeed +"km/s");
-            System.out.println("Humidity: " + humidity);
-            System.out.println("Weather Condition: " + weatherCondition);
-            System.out.println("Temperature: " + temperature);
-            System.out.println("Windspeed: " + windspeed);
+            // Image hicon = new Image("file:le5/src/main/resources/com/ampalaya/images/humidity.png");
+            // Image wicon = new Image("file:le5/src/main/resources/com/ampalaya/images/Windspeed.png");
+            // humidicon.setImage(hicon);
+            // windicon.setImage(wicon);
+
+            // System.out.println("Humidity: " + humidity);
+            // System.out.println("Weather Condition: " + weatherCondition);
+            // System.out.println("Temperature: " + temperature);
+            // System.out.println("Windspeed: " + windspeed);
 
             // Don't forget to update the other days as well
             JsonArray otherDays = outcome.getAsJsonArray("otherDays");
@@ -262,7 +379,7 @@ public class WeatherLocationApp {
 
 
 
-
+    
     //API call for location
     public static Double[] getLocationdata(String locationCity){
         //initialize variables
@@ -388,11 +505,15 @@ public class WeatherLocationApp {
         JsonArray date = (JsonArray) daily.get("time");
         JsonArray cond = (JsonArray) daily.get("weather_code");
 
-        for (int i = 1; i < date.size();i++){
+        for (int i = 2; i < date.size();i++){
             String day = getDayoftheWeek(date.get(i).getAsString());
             String condition = convertWeatherCode(cond.get(i).getAsLong());
             otherDays.add(createDayWeather(day, condition));
         }
+        String day = getDayoftheWeek(date.get(0).getAsString());
+        String condition = convertWeatherCode(cond.get(0    ).getAsLong());
+        otherDays.add(createDayWeather(day, condition));
+        
         return otherDays;
     }
 
@@ -470,8 +591,9 @@ public class WeatherLocationApp {
     private MapView createMapView(){
         MapView mapView = new MapView();
         mapView.setPrefSize(500, 400);
-        mapView.setZoom(10);
+        mapView.setZoom(13);
         mapView.flyTo(0, effielPoint, 0.1);
+        
         return mapView;
     }
 
