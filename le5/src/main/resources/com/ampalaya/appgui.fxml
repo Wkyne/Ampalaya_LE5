@@ -28,7 +28,7 @@
                            <children>
                               <VBox prefHeight="446.0" prefWidth="378.0">
                                  <children>
-                                    <TextField editable="false" promptText="CITY" />
+                                    <TextField editable="false" prefHeight="25.0" prefWidth="169.0" promptText="CITY" />
                                     <TextField editable="false" promptText="TEMP" />
                                  </children>
                               </VBox>
