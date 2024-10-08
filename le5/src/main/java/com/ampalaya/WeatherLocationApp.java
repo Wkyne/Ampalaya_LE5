@@ -18,12 +18,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+// import javafx.collections.FXCollections;
+// import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -42,6 +46,9 @@ public class WeatherLocationApp {
 
     @FXML
     private TextField citySearch;
+
+    @FXML
+    private Button searchbtn;
 
     @FXML
     private Label curCity;
@@ -112,34 +119,44 @@ public class WeatherLocationApp {
     @FXML
     private ImageView weather7th;
 
+    @FXML
+    private MapView mapView;
+
     // @FXML
-    private ObservableList<String> savedLocations = FXCollections.observableArrayList();
-    MapView mapView = new MapView();
+    // private ObservableList<String> savedLocations = FXCollections.observableArrayList();
+
     private MapPoint effielPoint = new MapPoint(48, 2.29);
     
     @FXML
     public void initialize() {
-        loadSavedLocations();
+        // loadSavedLocations();
         MapView mapView = createMapView();
         Mainlayout.getChildren().add(mapView);
         HBox.setHgrow(mapView, Priority.ALWAYS);
     }
     
-    private void loadSavedLocations() {
-        // For testing, you can hardcode some locations.
-        savedLocations.addAll("Manila", "Cebu", "Davao");
-        
-        // If you're using a file or database, load them here.
-        
-        // Update the UI
-        updateSavedLocationsUI();
+    public void searchLoc(){
+        fetchWeatherData(citySearch.getText());
     }
+     @FXML
+    void searchLoc(ActionEvent event) {
+        searchLoc();
+    }
+    // private void loadSavedLocations() {
+    //     // For testing, you can hardcode some locations.
+    //     savedLocations.addAll("Manila", "Cebu", "Davao");
+        
+    //     // If you're using a file or database, load them here.
+        
+    //     // Update the UI
+    //     updateSavedLocationsUI();
+    // }
     
-    private void updateSavedLocationsUI() {
-        // Object listViewSavedLocations;
-        // Assuming you have a ListView to display the saved locations
-        // listViewSavedLocations.setItems(savedLocations);
-    }
+    // private void updateSavedLocationsUI() {
+    //     // Object listViewSavedLocations;
+    //     // Assuming you have a ListView to display the saved locations
+    //     // listViewSavedLocations.setItems(savedLocations);
+    // }
 
 
     
@@ -161,6 +178,11 @@ public class WeatherLocationApp {
                 JsonObject outcome = new JsonObject();
                 try {
                     outcome = get();
+
+                    curCity.setText(locationCity);
+                    Double[] latLong = getLocationdata(locationCity); // Fetch latitude and longitude
+                    updateMapUI(latLong[0], latLong[1]);
+                    updateWeatherUI(outcome);
                 } catch (InterruptedException e) {
                     System.out.println(e);
                     e.printStackTrace();
@@ -174,9 +196,15 @@ public class WeatherLocationApp {
 
             @Override
             protected void failed() {
-                // Handle failure
                 System.out.println("Failed to fetch weather data.");
+                curCity.setText("Failed to retrieve data");
+                curTemp.setText("N/A");
+                curWindspeed.setText("N/A");
+                curHumid.setText("N/A");
+                // Optionally, set some default icons for the weather condition
+                curWeather.setImage(null); 
             }
+            
         };
 
         // Start the thread
@@ -191,6 +219,11 @@ public class WeatherLocationApp {
             String windspeed = outcome.get("windspeed").toString();
 
             // Here, you would update your UI components with the fetched data
+            
+            curHumid.setText(humidity);
+            curTemp.setText(temperature+"°");
+            setWeatherImage(weatherCondition, curWeather);
+            curWindspeed.setText(windspeed +"km/s");
             System.out.println("Humidity: " + humidity);
             System.out.println("Weather Condition: " + weatherCondition);
             System.out.println("Temperature: " + temperature);
@@ -214,12 +247,18 @@ public class WeatherLocationApp {
     }
 
 
-    public void updateMapUI(long lat, long lon){
-        MapPoint newPt = new MapPoint(lat, lon);
-
-        Mainlayout.getChildren().get(0);
-        // mapView.flyTo(newpt)
+    public void updateMapUI(double lat, double lon) {
+        MapPoint newPoint = new MapPoint(lat, lon);
+        for (Node node : Mainlayout.getChildren()) {
+            if (node instanceof MapView) {
+                mapView = (MapView) node;
+                mapView.flyTo(0, newPoint, 8.0);
+                break;
+            }
+        }   
     }
+    
+    
 
 
 
@@ -357,7 +396,30 @@ public class WeatherLocationApp {
         return otherDays;
     }
 
-    
+    @FXML
+    private void setWeatherImage(String weathertype, ImageView weathericon) {
+        switch (weathertype) {
+            case "Clear":
+                Image clearImage = new Image("file:le5/src/main/resources/com/ampalaya/images/CLEAR.png");
+                weathericon.setImage(clearImage);
+                break;
+            case "Cloudy":
+                Image cloudyImage = new Image("file:le5/src/main/resources/com/ampalaya/images/CLOUDY.png");
+                weathericon.setImage(cloudyImage);
+                break;
+            case "Raining":
+                Image rainingImage = new Image("file:le5/src/main/resources/com/ampalaya/images/RAINY.png");
+                weathericon.setImage(rainingImage);
+                break;
+            case "Snowing":
+                Image snowingImage = new Image("file:le5/src/main/resources/com/ampalaya/images/SNOWY.png");
+                weathericon.setImage(snowingImage);
+                break;
+            default:
+                weathericon.setImage(null);  // Default to no image if type is unknown
+                break;
+        }
+    }
 
 
     //basic methods
@@ -366,15 +428,19 @@ public class WeatherLocationApp {
 
         if (weather_code == 0L) {
             weatherCondition = "Clear";
+    
         } 
         else if(weather_code > 0L && weather_code <= 3L) {
             weatherCondition = "Cloudy";
+        
         }
         else if((weather_code >= 51L && weather_code <= 67L) || (weather_code >= 80L && weather_code <= 99L)){
             weatherCondition = "Raining";
+
         }
         else if(weather_code > 71L && weather_code < 77L) {
             weatherCondition = "Snowing";
+        
         } 
         return weatherCondition;
     }

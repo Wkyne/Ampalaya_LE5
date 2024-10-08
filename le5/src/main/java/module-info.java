@@ -8,6 +8,4 @@ module com.ampalaya {
 
     opens com.ampalaya to com.google.gson,javafx.fxml;
     exports com.ampalaya;
-    
-    
 }
