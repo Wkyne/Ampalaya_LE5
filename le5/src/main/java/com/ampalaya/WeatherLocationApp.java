@@ -12,7 +12,8 @@ import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
 
-
+import com.gluonhq.maps.MapPoint;
+import com.gluonhq.maps.MapView;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -21,6 +22,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 
 
 public class WeatherLocationApp {
@@ -30,15 +36,93 @@ public class WeatherLocationApp {
         App.setRoot("settings");
     }
 
-    @FXML
-    private ObservableList<String> savedLocations = FXCollections.observableArrayList();
-
     
+    @FXML
+    private HBox Mainlayout;
+
+    @FXML
+    private TextField citySearch;
+
+    @FXML
+    private Label curCity;
+
+    @FXML
+    private Label curHumid;
+
+    @FXML
+    private Label curTemp;
+
+    @FXML
+    private ImageView curWeather;
+
+    @FXML
+    private Label curWindspeed;
+
+    @FXML
+    private Label day2nd;
+
+    @FXML
+    private Label day3rd;
+
+    @FXML
+    private Label day4th;
+
+    @FXML
+    private Label day5th;
+
+    @FXML
+    private Label day6th;
+
+    @FXML
+    private Label day7th;
+
+    @FXML
+    private Label temp2nd;
+
+    @FXML
+    private Label temp3rd;
+
+    @FXML
+    private Label temp4th;
+
+    @FXML
+    private Label temp5th;
+
+    @FXML
+    private Label temp6th;
+
+    @FXML
+    private Label temp7th;
+
+    @FXML
+    private ImageView weather2nd;
+
+    @FXML
+    private ImageView weather3rd;
+
+    @FXML
+    private ImageView weather4th;
+
+    @FXML
+    private ImageView weather5th;
+
+    @FXML
+    private ImageView weather6th;
+
+    @FXML
+    private ImageView weather7th;
+
+    // @FXML
+    private ObservableList<String> savedLocations = FXCollections.observableArrayList();
+    MapView mapView = new MapView();
+    private MapPoint effielPoint = new MapPoint(48, 2.29);
     
     @FXML
     public void initialize() {
         loadSavedLocations();
-
+        MapView mapView = createMapView();
+        Mainlayout.getChildren().add(mapView);
+        HBox.setHgrow(mapView, Priority.ALWAYS);
     }
     
     private void loadSavedLocations() {
@@ -58,7 +142,7 @@ public class WeatherLocationApp {
     }
 
 
-
+    
 
     //threading
     public void fetchWeatherData(String locationCity) {
@@ -98,7 +182,7 @@ public class WeatherLocationApp {
         // Start the thread
         new Thread(weatherTask).start();
     }
-
+    
     private void updateWeatherUI(JsonObject outcome) {
         if (outcome != null) {
             String humidity = outcome.get("humidity").toString();
@@ -130,7 +214,12 @@ public class WeatherLocationApp {
     }
 
 
+    public void updateMapUI(long lat, long lon){
+        MapPoint newPt = new MapPoint(lat, lon);
 
+        Mainlayout.getChildren().get(0);
+        // mapView.flyTo(newpt)
+    }
 
 
 
@@ -312,6 +401,13 @@ public class WeatherLocationApp {
         return dayWeather;
     }
 
+    private MapView createMapView(){
+        MapView mapView = new MapView();
+        mapView.setPrefSize(500, 400);
+        mapView.setZoom(10);
+        mapView.flyTo(0, effielPoint, 0.1);
+        return mapView;
+    }
 
 }
 

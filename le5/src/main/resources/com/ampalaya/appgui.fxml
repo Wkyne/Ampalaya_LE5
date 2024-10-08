@@ -7,7 +7,6 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.web.WebView?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="473.0" prefWidth="722.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ampalaya.WeatherLocationApp">
    <children>
@@ -21,19 +20,95 @@
                   <Insets bottom="5.0" top="5.0" />
                </padding>
             </Label>
-            <HBox prefHeight="448.0" prefWidth="722.0">
+            <TextField fx:id="citySearch" prefHeight="37.0" prefWidth="562.0" promptText="Enter your city">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" />
+               </VBox.margin>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" top="10.0" />
+               </padding>
+            </TextField>
+            <HBox fx:id="Mainlayout" prefHeight="448.0" prefWidth="722.0">
                <children>
                   <VBox prefHeight="446.0" prefWidth="378.0">
                      <children>
                         <HBox prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <VBox prefHeight="446.0" prefWidth="378.0">
+                              <VBox prefHeight="100.0" prefWidth="306.0">
                                  <children>
-                                    <TextField editable="false" promptText="CITY" />
-                                    <TextField editable="false" promptText="TEMP" />
+                                    <Label fx:id="curCity" text="Label" />
+                                    <Label fx:id="curTemp" text="Label" />
                                  </children>
                               </VBox>
-                              <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                              <ImageView fx:id="curWeather" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="20.0" layoutY="120.0" prefHeight="134.0" prefWidth="358.0">
+                           <children>
+                              <VBox prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <ImageView fitHeight="91.0" fitWidth="91.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="curHumid" text="Humidity" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <ImageView fitHeight="91.0" fitWidth="91.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="curWindspeed" text="Label" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <ImageView fitHeight="91.0" fitWidth="91.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label text="Label" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="134.0" prefWidth="358.0">
+                           <children>
+                              <VBox prefHeight="446.0" prefWidth="378.0">
+                                 <children>
+                                    <Label fx:id="day2nd" text="Placeholder" />
+                                    <ImageView fx:id="weather2nd" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="temp2nd" text="TEMP" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="446.0" prefWidth="378.0">
+                                 <children>
+                                    <Label fx:id="day3rd" text="Placeholder" />
+                                    <ImageView fx:id="weather3rd" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="temp3rd" text="TEMP" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="446.0" prefWidth="378.0">
+                                 <children>
+                                    <Label fx:id="day4th" text="Placeholder" />
+                                    <ImageView fx:id="weather4th" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="temp4th" text="TEMP" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="446.0" prefWidth="378.0">
+                                 <children>
+                                    <Label fx:id="day5th" text="Placeholder" />
+                                    <ImageView fx:id="weather5th" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="temp5th" text="TEMP" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="446.0" prefWidth="378.0">
+                                 <children>
+                                    <Label fx:id="day6th" text="Placeholder" />
+                                    <ImageView fx:id="weather6th" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="temp6th" text="TEMP" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="446.0" prefWidth="378.0">
+                                 <children>
+                                    <Label fx:id="day7th" text="Placeholder" />
+                                    <ImageView fx:id="weather7th" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Label fx:id="temp7th" text="TEMP" />
+                                 </children>
+                              </VBox>
                            </children>
                         </HBox>
                      </children>
@@ -41,12 +116,6 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </padding>
                   </VBox>
-                  <WebView fx:id="webView" prefHeight="446.0" prefWidth="620.0" />
-                  <TextField fx:id="citySearch" prefHeight="26.0" prefWidth="350.0" promptText="Enter your city">
-                     <HBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </HBox.margin>
-                  </TextField>
                </children>
             </HBox>
          </children>

@@ -26,9 +26,9 @@
             <version>22</version>
         </dependency>
         <dependency>
-        <groupId>com.gluonhq.attach</groupId>
-            <artifactId>display</artifactId>
-            <version>4.0.21</version>
+            <groupId>com.gluonhq</groupId>
+            <artifactId>maps</artifactId>
+            <version>2.0.0-ea+6</version>
         </dependency>
     </dependencies>
     <build>
